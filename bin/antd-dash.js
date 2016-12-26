@@ -63,6 +63,11 @@ function fixStaticPath() {
   execSync(`find ${documentsPath} -name '*.html' | xargs perl -pi -e 's#src="/#src="./#'`);
 }
 
+function injectBasename() {
+  const script = "<script>window.__basename = window.location.pathname.split(\"/\").slice(0, 3).join(\"/\");</script>";
+  execSync(`find ${documentsPath} -name '*.html' | xargs perl -pi -e '$_ .= qq(${script}\n) if /<title>/'`);
+}
+
 function createDb() {
   query('CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);');
   query('CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);')
@@ -94,7 +99,8 @@ EOF
 clean();
 createFolder();
 copyHTML();
-//fixStaticPath();
+fixStaticPath();
+injectBasename()
 createPlist();
 createDb();
 indexComponents(markdown.components);
