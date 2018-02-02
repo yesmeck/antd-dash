@@ -26,19 +26,6 @@ function classify(string) {
   return string.split('-').map(capitalize).join('');
 }
 
-function extractMainContent() {
-  debug(`Extract main content.`);
-  const files = glob.sync(`${documentsPath}/**/*.html`);
-  files.forEach(file => {
-    const content = fs.readFileSync(file).toString();
-    $query = cheerio.load(content);
-    $query('#header').remove();
-    $query('.main-menu').remove();
-    $query('.main-wrapper .ant-row').last().remove();
-    fs.writeFileSync(file, $query.html());
-  });
-}
-
 function generateRecords() {
   debug(`Generate records.`);
   let $query;
@@ -76,6 +63,7 @@ function clean() {
 function createFolder() {
   debug(`Create ${docsetPath}.`);
   execSync(`mkdir -p ${resoucesPath}`);
+  execSync(`cp icon.png ${docsetPath}`);
 }
 
 function patchBisheng() {
@@ -95,8 +83,7 @@ function copyHTML() {
 function fixStaticPath() {
   debug('Fix static path.');
   execSync(`perl -pi -e 's#components/:children/#components/:children/index.html#' ${documentsPath}/index.js`);
-  execSync(`perl -pi -e 's#"path":"changelog"#"path":"changelog".html#' ${documentsPath}/index.js`);
-  execSync(`find ${documentsPath} -name '*.html' | xargs perl -pi -e 's#ant-col-lg-18 ant-col-xl-19 ant-col-xxl-20#ant-col-lg-24 ant-col-xl-24 ant-col-xxl-24#'`);
+  execSync(`perl -pi -e 's#"path":"changelog"#"path":"changelog.html"#' ${documentsPath}/index.js`);
   const commands = [
     `for dir in $(find ${documentsPath} -type d ! -path ${documentsPath} | uniq); `,
     `do for file in $(find ${documentsPath} \\( -name '*.js' -o -name '*.css' \\) -d 1); `,
@@ -149,7 +136,6 @@ function main() {
   createPlist();
   createDb();
   generateRecords();
-  extractMainContent();
 }
 
 main();
