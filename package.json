@@ -7,9 +7,15 @@
     "antd-dash": "./bin/antd-dash.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node ./"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "debug": "^3.1.0",
+    "glob": "^7.1.2",
+    "sequelize": "^4.32.2"
+  }
 }
