@@ -26,33 +26,6 @@ function classify(string) {
   return string.split('-').map(capitalize).join('');
 }
 
-function generateRecords() {
-  debug(`Generate records.`);
-  let $query;
-  // Guide
-  const guide =fs.readFileSync(path.join(documentsPath, 'docs', 'spec', 'introduce.html')).toString();
-  $query = cheerio.load(guide);
-  $query('.aside-container .ant-menu-item').each((i, item) => {
-    const name = $query(item).text();
-    const path = $query(item).find('a').attr('href') + '.html';
-    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Section', '${path}');`)
-  });
-
-  // Components
-  const component =fs.readFileSync(path.join(documentsPath, 'docs', 'react', 'introduce.html')).toString();
-  $query = cheerio.load(component);
-  $query('.aside-container .ant-menu-submenu .ant-menu-item').each((i, item) => {
-    const name = $query(item).text();
-    const path = $query(item).find('a').attr('href');
-    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Component', '${path}');`)
-  });
-
-  $query('.aside-container > .ant-menu-item').each((i, item) => {
-    const name = $query(item).text();
-    const path = $query(item).find('a').attr('href') + '.html';
-    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Guide', '${path}');`)
-  });
-}
 /******************************************************************************/
 
 function clean() {
@@ -84,16 +57,18 @@ function fixStaticPath() {
   debug('Fix static path.');
   execSync(`perl -pi -e 's#components/:children/#components/:children/index.html#' ${documentsPath}/index.js`);
   execSync(`perl -pi -e 's#"path":"changelog"#"path":"changelog.html"#' ${documentsPath}/index.js`);
-  const commands = [
-    `for dir in $(find ${documentsPath} -type d ! -path ${documentsPath} | uniq); `,
-    `do for file in $(find ${documentsPath} \\( -name '*.js' -o -name '*.css' \\) -d 1); `,
-    `do cp $file $dir; `,
-    'done; ',
-    'done'
-  ]
-  execSync(commands.join(''));
-  execSync(`find ${documentsPath} -name '*.html' | xargs perl -pi -e 's#href="/#href="./#'`);
-  execSync(`find ${documentsPath} -name '*.html' | xargs perl -pi -e 's#src="/#src="./#'`);
+  glob.sync(`${documentsPath}/**/*.html`).forEach(file => {
+    const relativePath = file.replace(documentsPath, '');
+    const deep = (relativePath.match(/\//g) || []).length;
+    if (deep > 1) {
+      const path = `./${Array(2).fill('..').join('/')}`;
+      const content = fs.readFileSync(file)
+        .toString()
+        .replace(/href="\/(.+).css"/g, `href="${path}/$1.css"`)
+        .replace(/src="\/(.+).js"/g, `src="${path}/$1.js"`);
+      fs.writeFileSync(file, content);
+    }
+  });;
 }
 
 function createDb() {
@@ -124,6 +99,34 @@ function createPlist() {
 </plist>
 EOF
   `);
+}
+
+function generateRecords() {
+  debug(`Generate records.`);
+  let $query;
+  // Guide
+  const guide =fs.readFileSync(path.join(documentsPath, 'docs', 'spec', 'introduce.html')).toString();
+  $query = cheerio.load(guide);
+  $query('.aside-container .ant-menu-item').each((i, item) => {
+    const name = $query(item).text();
+    const path = $query(item).find('a').attr('href') + '.html';
+    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Section', '${path}');`)
+  });
+
+  // Components
+  const component =fs.readFileSync(path.join(documentsPath, 'docs', 'react', 'introduce.html')).toString();
+  $query = cheerio.load(component);
+  $query('.aside-container .ant-menu-submenu .ant-menu-item').each((i, item) => {
+    const name = $query(item).text();
+    const path = $query(item).find('a').attr('href');
+    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Component', '${path}');`)
+  });
+
+  $query('.aside-container > .ant-menu-item').each((i, item) => {
+    const name = $query(item).text();
+    const path = $query(item).find('a').attr('href') + '.html';
+    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Guide', '${path}');`)
+  });
 }
 
 function main() {
