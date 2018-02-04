@@ -39,13 +39,14 @@ function createFolder() {
   execSync(`cp icon.png ${docsetPath}`);
 }
 
-function patchBisheng() {
-  debug('Patch bisheng.');
-}
-
 function buildSite() {
   debug('Build site.');
-  execSync(`cd ant-design && npm install --no-package-lock && npm run site`);
+  execSync('rm -rf ant-design');
+  execSync('git clone git@github.com:ant-design/ant-design.git --depth=1');
+  execSync('cd ant-design && npm install --no-package-lock ');
+  execSync('cd ant-design && patch -p1 < ../ant-design.patch');
+  execSync('cd ant-design/node_modules/bisheng && patch -p1 < ../../../bisheng.patch');
+  execSync('cd ant-design && npm run site');
 }
 
 function copyHTML() {
@@ -130,7 +131,6 @@ function generateRecords() {
 }
 
 function main() {
-  patchBisheng();
   buildSite();
   clean();
   createFolder();

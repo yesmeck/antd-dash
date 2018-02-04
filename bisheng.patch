@@ -1,0 +1,87 @@
+diff --git a/lib/entry.nunjucks.js b/lib/entry.nunjucks.js
+index bddfc2d..4877803 100644
+--- a/lib/entry.nunjucks.js
++++ b/lib/entry.nunjucks.js
+@@ -19,7 +19,9 @@ var _window$location = window.location,
+     hash = _window$location.hash;
+ 
+ var location = '' + pathname + search + hash;
+-var basename = '{{ root }}';
++var basename = location.match(/^(.+\/Contents\/Resources\/Documents)/)[0];
++__webpack_public_path__ = basename + '/';
++
+ ReactRouter.match({ routes: routes, location: location, basename: basename }, function () {
+   var router = React.createElement(ReactRouter.Router, {
+     history: ReactRouter.useRouterHistory(history.createHistory)({ basename: basename }),
+@@ -27,4 +29,4 @@ ReactRouter.match({ routes: routes, location: location, basename: basename }, fu
+     createElement: createElement
+   });
+   ReactDOM.render(router, document.getElementById('react-content'));
+-});
+\ No newline at end of file
++});
+diff --git a/lib/routes.nunjucks.js b/lib/routes.nunjucks.js
+index ff4b419..3197d84 100644
+--- a/lib/routes.nunjucks.js
++++ b/lib/routes.nunjucks.js
+@@ -63,6 +63,8 @@ module.exports = function getRoutes(data) {
+   function templateWrapper(template) {
+     var dataPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+ 
++    dataPath = dataPath.replace(/index\.html$/, '').replace(/\.html$/, '');
++
+     var Template = require('{{ themePath }}/template' + template.replace(/^\.\/template/, ''));
+ 
+     return function (nextState, callback) {
+@@ -71,7 +73,7 @@ module.exports = function getRoutes(data) {
+       var utils = generateUtils(data, nextState);
+ 
+       var collector = (Template.default || Template).collector || defaultCollector;
+-      var dynamicPropsKey = nextState.location.pathname;
++      var dynamicPropsKey = nextState.location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '');
+       var nextProps = _extends({}, nextState, {
+         themeConfig: themeConfig,
+         data: data.markdown,
+@@ -126,4 +128,4 @@ module.exports = function getRoutes(data) {
+   });
+ 
+   return processedRoutes;
+-};
+\ No newline at end of file
++};
+diff --git a/lib/ssr.nunjucks.js b/lib/ssr.nunjucks.js
+index 9a4542b..e2a0cb9 100644
+--- a/lib/ssr.nunjucks.js
++++ b/lib/ssr.nunjucks.js
+@@ -28,4 +28,4 @@ module.exports = function ssr(url, callback) {
+       callback(null, ''); // TODO
+     }
+   });
+-};
+\ No newline at end of file
++};
+diff --git a/lib/utils/create-element.js b/lib/utils/create-element.js
+index 04b9c55..999b81c 100644
+--- a/lib/utils/create-element.js
++++ b/lib/utils/create-element.js
+@@ -9,6 +9,6 @@ var NProgress = require('nprogress');
+ 
+ module.exports = function createElement(Component, props) {
+   NProgress.done();
+-  var dynamicPropsKey = props.location.pathname;
++  var dynamicPropsKey = props.location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '');
+   return React.createElement(Component, _extends({}, props, Component[dynamicPropsKey]));
+-};
+\ No newline at end of file
++};
+diff --git a/lib/utils/generate-files-path.js b/lib/utils/generate-files-path.js
+index bcfed74..6f5ac47 100644
+--- a/lib/utils/generate-files-path.js
++++ b/lib/utils/generate-files-path.js
+@@ -71,4 +71,4 @@ module.exports = function generateFilesPath(routes, markdown) {
+   }, flattenedRoutes);
+ 
+   return has404(filesPath) ? filesPath : filesPath.concat('/404.html');
+-};
+\ No newline at end of file
++};

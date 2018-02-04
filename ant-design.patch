@@ -1,0 +1,84 @@
+diff --git a/site/theme/template/Content/MainContent.jsx b/site/theme/template/Content/MainContent.jsx
+index be36f0c91..7e2608f0e 100644
+--- a/site/theme/template/Content/MainContent.jsx
++++ b/site/theme/template/Content/MainContent.jsx
+@@ -17,7 +17,7 @@ function getActiveMenuItem(props) {
+ }
+ 
+ function getModuleData(props) {
+-  const { pathname } = props.location;
++  const pathname = props.location.pathname.replace(/index\.html$/, '').replace(/\.html$/, '');
+   const moduleName = /^\/?components/.test(pathname) ?
+     'components' : pathname.split('/').filter(item => item).slice(0, 2).join('/');
+   const moduleData = moduleName === 'components' || moduleName === 'docs/react' ||
+@@ -250,12 +250,12 @@ export default class MainContent extends React.Component {
+             >
+               {menuChild}
+             </MobileMenu>) : (
+-              <Col xxl={4} xl={5} lg={6} md={24} sm={24} xs={24} className="main-menu">
++              <Col xxl={4} xl={5} lg={6} md={24} sm={24} xs={24} className="main-menu" style={{ display: 'none' }}>
+                 {menuChild}
+               </Col>
+             )
+           }
+-          <Col xxl={20} xl={19} lg={18} md={24} sm={24} xs={24} className={mainContainerClass}>
++          <Col span={24} className={mainContainerClass}>
+             {
+               props.demos ?
+                 <ComponentDoc {...props} doc={localizedPageData} demos={props.demos} /> :
+@@ -263,30 +263,6 @@ export default class MainContent extends React.Component {
+             }
+           </Col>
+         </Row>
+-
+-        <Row>
+-          <Col
+-            xxl={{ span: 20, offset: 4 }}
+-            xl={{ span: 19, offset: 5 }}
+-            lg={{ span: 18, offset: 6 }}
+-            md={24}
+-            sm={24}
+-            xs={24}
+-          >
+-            <section className="prev-next-nav">
+-              {
+-                prev ?
+-                  React.cloneElement(prev.props.children || prev.children[0], { className: 'prev-page' }) :
+-                  null
+-              }
+-              {
+-                next ?
+-                  React.cloneElement(next.props.children || next.children[0], { className: 'next-page' }) :
+-                  null
+-              }
+-            </section>
+-          </Col>
+-        </Row>
+       </div>
+     );
+   }
+diff --git a/site/theme/template/Content/index.jsx b/site/theme/template/Content/index.jsx
+index ed9456386..64f173c4f 100644
+--- a/site/theme/template/Content/index.jsx
++++ b/site/theme/template/Content/index.jsx
+@@ -8,7 +8,7 @@ function isChangelog(pathname) {
+ 
+ export default collect(async (nextProps) => {
+   const { pathname } = nextProps.location;
+-  const pageDataPath = pathname.replace('-cn', '').split('/');
++  const pageDataPath = pathname.replace(/index\.html$/, '').replace(/\.html$/, '').replace('-cn', '').split('/');
+   const pageData = isChangelog(pathname) ?
+     nextProps.data.changelog.CHANGELOG :
+     nextProps.utils.get(nextProps.data, pageDataPath);
+diff --git a/site/theme/template/Layout/index.jsx b/site/theme/template/Layout/index.jsx
+index 1a52ecc35..540713585 100644
+--- a/site/theme/template/Layout/index.jsx
++++ b/site/theme/template/Layout/index.jsx
+@@ -81,7 +81,6 @@ export default class Layout extends React.Component {
+     return (
+       <IntlProvider locale={appLocale.locale} messages={appLocale.messages}>
+         <div className="page-wrapper">
+-          <Header {...restProps} />
+           {children}
+           <Footer {...restProps} />
+         </div>
