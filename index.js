@@ -61,14 +61,13 @@ function fixStaticPath() {
   glob.sync(`${documentsPath}/**/*.html`).forEach(file => {
     const relativePath = file.replace(documentsPath, '');
     const deep = (relativePath.match(/\//g) || []).length;
-    if (deep > 1) {
-      const path = `./${Array(2).fill('..').join('/')}`;
-      const content = fs.readFileSync(file)
-        .toString()
-        .replace(/href="\/(.+).css"/g, `href="${path}/$1.css"`)
-        .replace(/src="\/(.+).js"/g, `src="${path}/$1.js"`);
-      fs.writeFileSync(file, content);
-    }
+    const path = deep === 1 ? './' : `./${Array(deep - 1).fill('..').join('/')}`;
+    const content = fs.readFileSync(file)
+      .toString()
+      .replace(/href="\/(.+).css"/g, `href="${path}/$1.css"`)
+      .replace(/src="\/(.+).js"/g, `src="${path}/$1.js"`)
+      .replace(/<html>/, `<html><!-- Online page at https://ant.design${relativePath.replace('index.html', '').replace('.html', '')} -->`);
+    fs.writeFileSync(file, content);
   });;
 }
 
@@ -92,6 +91,8 @@ function createPlist() {
   <string>Ant Design</string>
   <key>DocSetPlatformFamily</key>
   <string>antd</string>
+  <key>DashDocSetFamily</key>
+  <string>dashtoc</string>
   <key>isDashDocset</key>
   <true/>
   <key>isJavaScriptEnabled</key>
@@ -105,15 +106,6 @@ EOF
 function generateRecords() {
   debug(`Generate records.`);
   let $query;
-  // Guide
-  const guide =fs.readFileSync(path.join(documentsPath, 'docs', 'spec', 'introduce.html')).toString();
-  $query = cheerio.load(guide);
-  $query('.aside-container .ant-menu-item').each((i, item) => {
-    const name = $query(item).text();
-    const path = $query(item).find('a').attr('href') + '.html';
-    query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Section', '${path}');`)
-  });
-
   // Components
   const component =fs.readFileSync(path.join(documentsPath, 'docs', 'react', 'introduce.html')).toString();
   $query = cheerio.load(component);

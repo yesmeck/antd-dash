@@ -1,5 +1,43 @@
+diff --git a/site/theme/template/Content/Article.jsx b/site/theme/template/Content/Article.jsx
+index 02b7e65..95069a2 100644
+--- a/site/theme/template/Content/Article.jsx
++++ b/site/theme/template/Content/Article.jsx
+@@ -102,7 +102,7 @@ export default class Article extends React.Component {
+           }
+           {
+             (!content.toc || content.toc.length <= 1 || meta.toc === false) ? null :
+-            <Affix className="toc-affix" offsetTop={16}>
++            <Affix className="toc-affix" offsetTop={16} style={{ display: 'none' }}>
+               {
+                 props.utils.toReactComponent(
+                   ['ul', { className: 'toc' }].concat(getChildren(content.toc))
+diff --git a/site/theme/template/Content/ComponentDoc.jsx b/site/theme/template/Content/ComponentDoc.jsx
+index 963cbec..f564890 100644
+--- a/site/theme/template/Content/ComponentDoc.jsx
++++ b/site/theme/template/Content/ComponentDoc.jsx
+@@ -78,7 +78,7 @@ export default class ComponentDoc extends React.Component {
+     return (
+       <DocumentTitle title={`${subtitle || ''} ${title[locale] || title} - Ant Design`}>
+         <article>
+-          <Affix className="toc-affix" offsetTop={16}>
++          <Affix className="toc-affix" offsetTop={16} style={{ display: 'none' }}>
+             <ul id="demo-toc" className="toc">
+               {jumper}
+             </ul>
+diff --git a/site/theme/template/Content/Demo.jsx b/site/theme/template/Content/Demo.jsx
+index 410dc5a..42e6c75 100644
+--- a/site/theme/template/Content/Demo.jsx
++++ b/site/theme/template/Content/Demo.jsx
+@@ -183,6 +183,7 @@ ${state.sourceCode.replace('mountNode', 'document.getElementById(\'container\')'
+     };
+     return (
+       <section className={codeBoxClass} id={meta.id}>
++        <a name={`//apple_ref/cpp/Section/${encodeURI(localizedTitle)}`} className="dashAnchor"></a>
+         <section className="code-box-demo">
+           {this.liveDemo}
+           {
 diff --git a/site/theme/template/Content/MainContent.jsx b/site/theme/template/Content/MainContent.jsx
-index be36f0c91..7e2608f0e 100644
+index be36f0c..7e2608f 100644
 --- a/site/theme/template/Content/MainContent.jsx
 +++ b/site/theme/template/Content/MainContent.jsx
 @@ -17,7 +17,7 @@ function getActiveMenuItem(props) {
@@ -58,7 +96,7 @@ index be36f0c91..7e2608f0e 100644
      );
    }
 diff --git a/site/theme/template/Content/index.jsx b/site/theme/template/Content/index.jsx
-index ed9456386..64f173c4f 100644
+index ed94563..64f173c 100644
 --- a/site/theme/template/Content/index.jsx
 +++ b/site/theme/template/Content/index.jsx
 @@ -8,7 +8,7 @@ function isChangelog(pathname) {
@@ -71,7 +109,7 @@ index ed9456386..64f173c4f 100644
      nextProps.data.changelog.CHANGELOG :
      nextProps.utils.get(nextProps.data, pageDataPath);
 diff --git a/site/theme/template/Layout/index.jsx b/site/theme/template/Layout/index.jsx
-index 1a52ecc35..540713585 100644
+index 1a52ecc..5407135 100644
 --- a/site/theme/template/Layout/index.jsx
 +++ b/site/theme/template/Layout/index.jsx
 @@ -81,7 +81,6 @@ export default class Layout extends React.Component {
