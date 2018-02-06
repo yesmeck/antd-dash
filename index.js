@@ -67,6 +67,7 @@ function fixStaticPath() {
       .toString()
       .replace(/href="\/(.+).css"/g, `href="${path}/$1.css"`)
       .replace(/src="\/(.+).js"/g, `src="${path}/$1.js"`)
+      .replace(/href="\//g, 'href="https://ant.design/')
       .replace(/<html>/, `<html><!-- Online page at https://ant.design${relativePath.replace('index.html', '').replace('.html', '')} -->`);
     fs.writeFileSync(file, content);
   });;
@@ -112,13 +113,13 @@ function generateRecords() {
   $query = cheerio.load(component);
   $query('.aside-container .ant-menu-submenu .ant-menu-item').each((i, item) => {
     const name = $query(item).text();
-    const path = $query(item).find('a').attr('href');
+    const path = $query(item).find('a').attr('href').replace(/^\//, '') + 'index.html';
     query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Component', '${path}');`)
   });
 
   $query('.aside-container > .ant-menu-item').each((i, item) => {
     const name = $query(item).text();
-    const path = $query(item).find('a').attr('href') + '.html';
+    const path = $query(item).find('a').attr('href').replace(/^\//, '') + '.html';
     query(`INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('${name}', 'Guide', '${path}');`)
   });
 }
@@ -128,10 +129,10 @@ function main() {
   clean();
   createFolder();
   copyHTML();
-  fixStaticPath();
   createPlist();
   createDb();
   generateRecords();
+  fixStaticPath();
 }
 
 main();
