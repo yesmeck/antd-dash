@@ -6,7 +6,7 @@ const glob = require('glob');
 const debug = require('debug')('antd-dash');
 
 const sitePath = path.join(process.cwd(), 'ant-design', '_site');
-const docsetPath = path.join(process.cwd(), 'ant-design.docset');
+const docsetPath = path.join(process.cwd(), 'Ant_Design.docset');
 const contentsPath = path.join(docsetPath, 'Contents');
 const resoucesPath = path.join(contentsPath, 'Resources');
 const documentsPath = path.join(resoucesPath, 'Documents');
@@ -37,6 +37,7 @@ function createFolder() {
   debug(`Create ${docsetPath}.`);
   execSync(`mkdir -p ${resoucesPath}`);
   execSync(`cp icon.png ${docsetPath}`);
+  execSync(`cp icon@2x.png ${docsetPath}`);
 }
 
 function buildSite() {
